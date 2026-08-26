@@ -1,0 +1,11 @@
+HARBOURLINE MUTUAL - VISION CLAIM FORM (fictional sample)
+
+Member ID: M-1003
+Patient name: Priya S.
+Relationship to member: Self
+Service type: Prescription eyeglasses
+Service date: 2025-09-01
+Provider: Clearview Optical
+Amount charged: $210.00
+
+I certify that the information on this form is true and complete.

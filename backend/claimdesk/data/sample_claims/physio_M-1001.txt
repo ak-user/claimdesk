@@ -1,0 +1,12 @@
+HARBOURLINE MUTUAL - HEALTH CLAIM FORM (fictional sample)
+
+Member ID: M-1001
+Patient name: Olena K.
+Relationship to member: Self
+Service type: Physiotherapy
+Service date: 2026-10-14
+Provider: Riverside Physio Clinic
+Provider registration #: PT-48213
+Amount charged: $120.00 CAD
+
+I certify that the information on this form is true and complete.

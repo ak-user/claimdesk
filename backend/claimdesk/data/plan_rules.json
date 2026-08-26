@@ -1,0 +1,96 @@
+{
+  "plan_number": "GB-20417",
+  "insurer": "Harbourline Mutual (fictional)",
+  "claim_deadline_months": 12,
+  "claim_deadline_section": "3.2",
+  "required_info_section": "3.3",
+  "human_review_section": "3.4",
+  "benefits": {
+    "physiotherapy": {
+      "display": "Physiotherapy",
+      "section": "4.2",
+      "coinsurance": 0.8,
+      "maximum": 750,
+      "period": "plan_year",
+      "requires_registration": true,
+      "keywords": ["physiotherapy", "physiotherapist", "physio"]
+    },
+    "massage_therapy": {
+      "display": "Massage therapy",
+      "section": "4.3",
+      "coinsurance": 0.8,
+      "maximum": 500,
+      "period": "plan_year",
+      "requires_registration": true,
+      "keywords": ["massage therapy", "massage therapist", "massage", "rmt"]
+    },
+    "chiropractic": {
+      "display": "Chiropractic care",
+      "section": "4.4",
+      "coinsurance": 0.8,
+      "maximum": 500,
+      "period": "plan_year",
+      "requires_registration": true,
+      "keywords": ["chiropractic", "chiropractor", "chiro"]
+    },
+    "psychology": {
+      "display": "Psychology and counselling",
+      "section": "4.5",
+      "coinsurance": 0.8,
+      "maximum": 1000,
+      "period": "plan_year",
+      "requires_registration": true,
+      "keywords": ["psychology", "psychologist", "psychotherapist", "psychotherapy", "counselling", "counseling", "social worker"]
+    },
+    "vision": {
+      "display": "Vision care",
+      "section": "4.6",
+      "coinsurance": 1.0,
+      "maximum": 250,
+      "period": "rolling_24_months",
+      "requires_registration": false,
+      "keywords": ["eyeglasses", "glasses", "contact lenses", "contacts", "laser eye surgery", "eye exam", "vision"]
+    },
+    "dental_basic": {
+      "display": "Basic dental",
+      "section": "5.1",
+      "coinsurance": 0.8,
+      "shared_maximum": "dental",
+      "period": "plan_year",
+      "requires_registration": false,
+      "keywords": ["cleaning", "cleanings", "filling", "fillings", "dental exam", "extraction", "root canal", "basic dental"]
+    },
+    "dental_major": {
+      "display": "Major dental",
+      "section": "5.2",
+      "coinsurance": 0.5,
+      "shared_maximum": "dental",
+      "period": "plan_year",
+      "waiting_months": 12,
+      "requires_registration": false,
+      "keywords": ["crown", "crowns", "bridge", "bridges", "denture", "dentures", "implant", "implants", "major dental"]
+    },
+    "prescription_drugs": {
+      "display": "Prescription drugs",
+      "section": "4.1",
+      "coinsurance": 0.8,
+      "maximum": null,
+      "period": "plan_year",
+      "requires_registration": false,
+      "keywords": ["prescription drugs", "prescription drug", "medications", "medication", "drugs", "pharmacy"]
+    }
+  },
+  "fallback_keywords": {
+    "dental": "dental_basic",
+    "dentist": "dental_basic",
+    "teeth": "dental_basic"
+  },
+  "shared_maximums": {
+    "dental": {
+      "display": "Dental (basic and major combined)",
+      "section": "5.3",
+      "maximum": 1500,
+      "period": "plan_year"
+    }
+  }
+}

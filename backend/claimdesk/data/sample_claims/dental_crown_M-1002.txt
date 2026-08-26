@@ -1,0 +1,11 @@
+HARBOURLINE MUTUAL - DENTAL CLAIM FORM (fictional sample)
+
+Member ID: M-1002
+Patient name: Daniel R.
+Relationship to member: Self
+Service type: Crown (porcelain, upper molar)
+Service date: October 2, 2026
+Provider: Northgate Family Dental
+Amount charged: $1,180.00
+
+I certify that the information on this form is true and complete.

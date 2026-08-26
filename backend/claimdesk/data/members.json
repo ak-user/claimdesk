@@ -1,0 +1,39 @@
+{
+  "note": "Fictional members and claims for the ClaimDesk demo.",
+  "members": [
+    {
+      "member_id": "M-1001",
+      "first_name": "Olena",
+      "plan_number": "GB-20417",
+      "enrolled": "2024-03-01",
+      "claims": [
+        {"claim_id": "C-5001", "benefit": "physiotherapy", "service_date": "2026-02-10", "charged": 120.0, "paid": 96.0, "status": "paid"},
+        {"claim_id": "C-5002", "benefit": "physiotherapy", "service_date": "2026-04-02", "charged": 120.0, "paid": 96.0, "status": "paid"},
+        {"claim_id": "C-5003", "benefit": "physiotherapy", "service_date": "2026-06-15", "charged": 140.0, "paid": 112.0, "status": "paid"},
+        {"claim_id": "C-5004", "benefit": "dental_basic", "service_date": "2026-05-20", "charged": 260.0, "paid": 208.0, "status": "paid"},
+        {"claim_id": "C-5005", "benefit": "massage_therapy", "service_date": "2025-11-02", "charged": 100.0, "paid": 80.0, "status": "paid"}
+      ]
+    },
+    {
+      "member_id": "M-1002",
+      "first_name": "Daniel",
+      "plan_number": "GB-20417",
+      "enrolled": "2026-06-01",
+      "claims": [
+        {"claim_id": "C-5101", "benefit": "dental_basic", "service_date": "2026-07-15", "charged": 180.0, "paid": 144.0, "status": "paid"}
+      ]
+    },
+    {
+      "member_id": "M-1003",
+      "first_name": "Priya",
+      "plan_number": "GB-20417",
+      "enrolled": "2023-09-01",
+      "claims": [
+        {"claim_id": "C-5201", "benefit": "vision", "service_date": "2025-08-12", "charged": 180.0, "paid": 180.0, "status": "paid"},
+        {"claim_id": "C-5202", "benefit": "massage_therapy", "service_date": "2026-03-03", "charged": 125.0, "paid": 100.0, "status": "paid"},
+        {"claim_id": "C-5203", "benefit": "massage_therapy", "service_date": "2026-05-19", "charged": 125.0, "paid": 100.0, "status": "paid"},
+        {"claim_id": "C-5204", "benefit": "massage_therapy", "service_date": "2026-08-27", "charged": 125.0, "paid": 100.0, "status": "paid"}
+      ]
+    }
+  ]
+}
