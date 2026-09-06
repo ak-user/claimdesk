@@ -1,0 +1,20 @@
+{"question": "How long do I have to submit a claim?", "sections": ["3.2"], "expect": ["12 months"]}
+{"question": "Do I need a doctor's referral for physio?", "sections": ["4.2"], "expect": ["not required"]}
+{"question": "What does the plan pay for a crown?", "sections": ["5.2"], "expect": ["50%"]}
+{"question": "Is there a limit on prescription drugs?", "sections": ["4.1"], "expect": ["no annual maximum"]}
+{"question": "Until what age are my kids covered?", "sections": ["2.2"], "expect": ["21"]}
+{"question": "How often are dental cleanings covered?", "sections": ["5.1"], "expect": ["9 months"]}
+{"question": "How much can I get for glasses?", "sections": ["4.6"], "expect": ["$250"]}
+{"question": "How do I appeal a claim decision?", "sections": ["8"], "expect": ["90 days"]}
+{"question": "My wife has another group plan. Where do I submit first?", "sections": ["7"], "expect": ["this plan first"]}
+{"question": "What information does a massage therapy claim need?", "sections": ["3.3", "4.3"], "expect": ["registration number"]}
+{"question": "Are missed appointment fees covered?", "sections": ["6"], "expect": ["missed appointment"]}
+{"question": "What's the dental maximum?", "sections": ["5.3"], "expect": ["$1,500"]}
+{"question": "How long does it take to process a claim?", "sections": ["3.4"], "expect": ["5 business days"]}
+{"question": "Who is eligible for the plan?", "sections": ["2.1"], "expect": ["24 hours"]}
+{"question": "Does the plan cover counselling?", "sections": ["4.5"], "expect": ["$1,000"]}
+{"question": "How much physio do I have left? My member ID is M-1001", "sections": ["4.2"], "expect": ["$446.00"]}
+{"question": "Can M-1002 get a crown covered now?", "sections": ["5.2"], "expect": ["2027-06-01"]}
+{"question": "How much vision coverage does M-1003 have left?", "sections": ["4.6"], "expect": ["$70.00"]}
+{"question": "What would I get back for a $95 massage? M-1003", "sections": ["4.3"], "expect": ["$76.00"]}
+{"question": "How much dental do I have left? M-1001", "sections": ["5.3", "5.1"], "expect": ["$1,292.00"]}
