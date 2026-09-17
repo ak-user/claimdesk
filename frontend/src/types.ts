@@ -24,6 +24,11 @@ export interface ToolStep {
   ms: number;
 }
 
+export interface Turn {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface Answer {
   answer: string;
   citations: Citation[];

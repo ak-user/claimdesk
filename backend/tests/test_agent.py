@@ -2,8 +2,9 @@ import json
 
 from conftest import FakeChat
 
-from claimdesk.agent import Agent
+from claimdesk.agent import HISTORY_TURNS, Agent
 from claimdesk.llm import ChatResult, ToolCallRequest
+from claimdesk.models import Turn
 
 
 def tools_used(answer):
@@ -135,3 +136,50 @@ def test_provider_failure_falls_back_to_the_offline_planner(components):
     answer = agent.answer("How long do I have to submit a claim?")
     assert "model_unavailable_answered_offline" in answer.flags
     assert "12 months" in answer.answer
+
+
+# ----- follow-up questions -------------------------------------------------------------------
+
+
+def turns(*pairs):
+    return [Turn(role=role, content=content) for role, content in pairs]
+
+
+def test_follow_up_reuses_the_benefit_from_the_last_question(components):
+    history = turns(
+        ("user", "How much physio do I have left?"),
+        ("assistant", "Alex has $446.00 left for physiotherapy this year [4.2]."),
+    )
+    answer = components.agent.answer(
+        "What about a $120 session?", member_id="M-1001", history=history
+    )
+    assert "$96.00" in answer.answer
+    assert "estimate_reimbursement" in tools_used(answer)
+
+
+def test_follow_up_reuses_the_member_from_the_last_question(components):
+    history = turns(("user", "How much physio does M-1001 have left?"))
+    answer = components.agent.answer("And how much dental?", history=history)
+    assert "$1,292.00" in answer.answer
+
+
+def test_new_topic_does_not_inherit_the_old_benefit(components):
+    history = turns(("user", "How much physio do I have left?"))
+    answer = components.agent.answer(
+        "How long do I have to submit a claim?", member_id="M-1001", history=history
+    )
+    assert "within 12 months of the date of service" in answer.answer
+    assert "get_benefit_usage" not in tools_used(answer)
+
+
+def test_model_sees_recent_history(components):
+    chat = FakeChat([ChatResult(content="It's in section 3.2.")])
+    agent = Agent(components.toolbox, components.retriever, chat)
+    history = turns(*[("user", f"question {i}") for i in range(10)])
+    agent.answer("And the deadline?", history=history)
+    sent = chat.calls[0]["messages"]
+    assert sent[0]["role"] == "system"
+    assert [m["content"] for m in sent[1:-1]] == [f"question {i}" for i in range(10)][
+        -HISTORY_TURNS:
+    ]
+    assert sent[-1]["content"] == "And the deadline?"

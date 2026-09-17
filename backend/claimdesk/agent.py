@@ -22,7 +22,7 @@ from .guardrails import (
 )
 from .ingest import snippet, split_sentences
 from .llm import ChatClient
-from .models import AnswerOut, Citation, ToolStep
+from .models import AnswerOut, Citation, ToolStep, Turn
 from .retrieval import Retriever, tokenize
 from .tools import Toolbox
 
@@ -53,7 +53,13 @@ USAGE_INTENT = re.compile(
 COVERAGE_INTENT = re.compile(
     r"\b(?:covered|cover|eligible|get\s+back|reimburs\w*|pay\s+for|now)\b", re.IGNORECASE
 )
+# Short questions that lean on the previous turn: "what about massage?", "and for $90?"
+FOLLOW_UP = re.compile(
+    r"^\s*(?:and|also|what\s+about|how\s+about|what\s+if|same\s+for|then)\b", re.IGNORECASE
+)
 SECTION_KEYS = {"section", "maximum_section", "review_section"}
+# The model sees this many earlier turns; older ones rarely matter and cost tokens.
+HISTORY_TURNS = 6
 
 
 def money(value: float) -> str:
@@ -77,8 +83,11 @@ class Agent:
     def provider(self) -> str:
         return self.client.provider if self.client else "offline"
 
-    def answer(self, question: str, member_id: str | None = None) -> AnswerOut:
+    def answer(
+        self, question: str, member_id: str | None = None, history: list[Turn] | None = None
+    ) -> AnswerOut:
         question = question.strip()
+        history = list(history or [])[-HISTORY_TURNS:]
         member_id = member_id.strip().upper() if member_id and member_id.strip() else None
         if is_medical_advice_request(question):
             return AnswerOut(
@@ -93,18 +102,18 @@ class Agent:
             )
             return self._finish(text, {section}, [], refused=True)
         if self.client is None:
-            return self._offline(question, member_id)
+            return self._offline(question, member_id, history)
         try:
-            return self._with_model(question, member_id)
+            return self._with_model(question, member_id, history)
         except Exception:  # noqa: BLE001 - keep answering if the provider is down
             log.exception("Model call failed; answering with the offline planner.")
-            answer = self._offline(question, member_id)
+            answer = self._offline(question, member_id, history)
             answer.flags.append("model_unavailable_answered_offline")
             return answer
 
     # ----- model path ------------------------------------------------------------------------
 
-    def _with_model(self, question: str, member_id: str | None) -> AnswerOut:
+    def _with_model(self, question: str, member_id: str | None, history: list[Turn]) -> AnswerOut:
         assert self.client is not None
         rules = self.toolbox.rules
         system = SYSTEM_PROMPT.format(
@@ -115,6 +124,7 @@ class Agent:
         user = question if not member_id else f"{question}\n\n(Member ID: {member_id})"
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": system},
+            *({"role": turn.role, "content": turn.content} for turn in history),
             {"role": "user", "content": user},
         ]
         tools = self.toolbox.schemas()
@@ -162,7 +172,7 @@ class Agent:
 
     # ----- offline path ----------------------------------------------------------------------
 
-    def _offline(self, question: str, member_id: str | None) -> AnswerOut:
+    def _offline(self, question: str, member_id: str | None, history: list[Turn]) -> AnswerOut:
         trace: list[ToolStep] = []
         allowed: set[str] = set()
 
@@ -179,6 +189,11 @@ class Agent:
         about_account = bool(
             USAGE_INTENT.search(question) or COVERAGE_INTENT.search(question) or amount
         )
+        if history and (FOLLOW_UP.search(question) or amount):
+            earlier_benefit, earlier_member, earlier_about_account = self._from_history(history)
+            benefit = benefit or earlier_benefit
+            member = member or earlier_member
+            about_account = about_account or earlier_about_account
 
         if member and benefit and about_account:
             person = run("get_member", member_id=member)
@@ -203,6 +218,23 @@ class Agent:
         if benefit and USAGE_INTENT.search(question) and not member:
             text = "To check your balance I need your member ID, for example M-1001. " + text
         return self._finish(text, allowed, trace)
+
+    def _from_history(self, history: list[Turn]) -> tuple[str | None, str | None, bool]:
+        """The most recent benefit and member ID the member mentioned, and whether the last
+        question was about their own account rather than the policy in general."""
+        benefit = member = None
+        user_turns = [turn.content for turn in reversed(history) if turn.role == "user"]
+        for text in user_turns:
+            benefit = benefit or self.toolbox.classify_benefit(text)
+            if member is None and (found := MEMBER_IN_TEXT.search(text)):
+                member = found.group(0).upper()
+            if benefit and member:
+                break
+        last = user_turns[0] if user_turns else ""
+        about_account = bool(
+            USAGE_INTENT.search(last) or COVERAGE_INTENT.search(last) or _amount(last)
+        )
+        return benefit, member, about_account
 
     # ----- shared ----------------------------------------------------------------------------
 

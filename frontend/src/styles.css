@@ -87,6 +87,16 @@ button:disabled {
   opacity: 0.6;
 }
 
+button.link {
+  align-self: flex-end;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
 button.primary {
   background: var(--accent);
   border-color: var(--accent);

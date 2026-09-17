@@ -64,7 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/ask", response_model=AnswerOut)
     def ask(body: AskRequest) -> AnswerOut:
         log.info("question: %s", mask_pii(body.question))
-        return components.agent.answer(body.question, body.member_id)
+        return components.agent.answer(body.question, body.member_id, body.history)
 
     @app.post("/api/claims/assess", response_model=ClaimAssessment)
     def assess(body: ClaimText) -> ClaimAssessment:

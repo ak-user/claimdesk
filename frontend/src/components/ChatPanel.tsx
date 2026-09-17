@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 
 import { api } from "../api";
 import { describeFlag } from "../format";
-import type { Answer } from "../types";
+import type { Answer, Turn } from "../types";
 import { AnswerText, SourceList } from "./Citations";
 import { Trace } from "./Trace";
 
@@ -15,6 +15,9 @@ const EXAMPLES: { question: string; member: string | null }[] = [
   { question: "How long do I have to submit a claim?", member: null },
   { question: "Should I take ibuprofen for back pain?", member: null },
 ];
+
+// The API keeps the last six turns; send the same so follow-ups like "what about $90?" work.
+const HISTORY_EXCHANGES = 3;
 
 interface Exchange {
   id: number;
@@ -35,11 +38,20 @@ export function ChatPanel() {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
     const id = nextId.current++;
+    // Exchanges are newest first; the API wants the conversation oldest first, for one member.
+    const history: Turn[] = exchanges
+      .filter((e) => e.answer?.answer && e.member === memberId)
+      .slice(0, HISTORY_EXCHANGES)
+      .reverse()
+      .flatMap((e) => [
+        { role: "user" as const, content: e.question },
+        { role: "assistant" as const, content: e.answer!.answer },
+      ]);
     setExchanges((current) => [{ id, question: trimmed, member: memberId }, ...current]);
     setQuestion("");
     setBusy(true);
     try {
-      const answer = await api.ask(trimmed, memberId);
+      const answer = await api.ask(trimmed, memberId, history);
       setExchanges((current) => current.map((e) => (e.id === id ? { ...e, answer } : e)));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Something went wrong.";
@@ -110,6 +122,11 @@ export function ChatPanel() {
       </div>
 
       <div className="exchanges">
+        {exchanges.length > 0 && (
+          <button type="button" className="link" disabled={busy} onClick={() => setExchanges([])}>
+            Start a new conversation
+          </button>
+        )}
         {exchanges.length === 0 && (
           <p className="empty">
             Pick an example or ask your own question. Balance questions need a member.

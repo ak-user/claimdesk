@@ -21,9 +21,16 @@ class ToolStep(BaseModel):
     ms: float
 
 
+class Turn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=4000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
     member_id: str | None = Field(default=None, max_length=20)
+    # Earlier turns of the conversation, oldest first, so follow-ups like "what about $90?" work.
+    history: list[Turn] = Field(default=[], max_length=20)
 
 
 class AnswerOut(BaseModel):

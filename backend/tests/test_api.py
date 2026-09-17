@@ -72,3 +72,18 @@ def test_samples(client):
     assert "Member ID: M-1001" in client.get("/api/samples/physio_M-1001").json()["text"]
     assert client.get("/api/samples/nope").status_code == 404
     assert client.get("/api/samples/..%2Fplan_rules").status_code == 404
+
+
+def test_ask_with_history(client):
+    response = client.post(
+        "/api/ask",
+        json={
+            "question": "What about a $120 session?",
+            "member_id": "M-1001",
+            "history": [{"role": "user", "content": "How much physio do I have left?"}],
+        },
+    )
+    assert response.status_code == 200
+    assert "$96.00" in response.json()["answer"]
+    too_long = [{"role": "user", "content": "hi"}] * 21
+    assert client.post("/api/ask", json={"question": "x", "history": too_long}).status_code == 422

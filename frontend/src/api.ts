@@ -1,4 +1,4 @@
-import type { Answer, ClaimAssessment, Health, Sample } from "./types";
+import type { Answer, ClaimAssessment, Health, Sample, Turn } from "./types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -31,8 +31,8 @@ const json = (body: unknown): RequestInit => ({
 
 export const api = {
   health: () => request<Health>("/api/health"),
-  ask: (question: string, memberId: string | null) =>
-    request<Answer>("/api/ask", json({ question, member_id: memberId })),
+  ask: (question: string, memberId: string | null, history: Turn[] = []) =>
+    request<Answer>("/api/ask", json({ question, member_id: memberId, history })),
   assess: (text: string) => request<ClaimAssessment>("/api/claims/assess", json({ text })),
   upload: (file: File) => {
     const form = new FormData();
