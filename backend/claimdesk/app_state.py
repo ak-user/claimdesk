@@ -11,6 +11,7 @@ from .config import Settings
 from .ingest import parse_booklet
 from .llm import build_clients
 from .retrieval import Retriever
+from .review_queue import ReviewQueue
 from .store import load_booklet, load_members, load_rules
 from .tools import Toolbox
 
@@ -24,6 +25,7 @@ class Components:
     toolbox: Toolbox
     agent: Agent
     assessor: ClaimAssessor
+    queue: ReviewQueue
 
     @property
     def provider(self) -> str:
@@ -52,4 +54,5 @@ def build_components(settings: Settings) -> Components:
         retriever.mode,
         len(retriever.chunks),
     )
-    return Components(settings, retriever, toolbox, agent, assessor)
+    queue = ReviewQueue(settings.claimdesk_db_path)
+    return Components(settings, retriever, toolbox, agent, assessor, queue)

@@ -87,3 +87,31 @@ def test_ask_with_history(client):
     assert "$96.00" in response.json()["answer"]
     too_long = [{"role": "user", "content": "hi"}] * 21
     assert client.post("/api/ask", json={"question": "x", "history": too_long}).status_code == 422
+
+
+def test_examiner_queue(client):
+    text = (SAMPLES_DIR / "physio_M-1001.txt").read_text()
+    created = client.post("/api/claims", json={"text": text})
+    assert created.status_code == 201
+    claim = created.json()
+    assert claim["review_status"] == "pending"
+    assert claim["assessment"]["status"] == "ready_for_review"
+
+    pending = client.get("/api/claims", params={"status": "pending"}).json()
+    assert claim["id"] in [c["id"] for c in pending]
+    assert client.get(f"/api/claims/{claim['id']}").json() == claim
+    assert client.get("/api/health").json()["queue"]["pending"] >= 1
+
+    decision = {"decision": "approved", "reviewer": "J. Okafor"}
+    reviewed = client.post(f"/api/claims/{claim['id']}/review", json=decision)
+    assert reviewed.status_code == 200
+    assert reviewed.json()["reviewer"] == "J. Okafor"
+    assert client.post(f"/api/claims/{claim['id']}/review", json=decision).status_code == 409
+
+
+def test_examiner_queue_errors(client):
+    assert client.get("/api/claims/9999").status_code == 404
+    decision = {"decision": "approved", "reviewer": "J. Okafor"}
+    assert client.post("/api/claims/9999/review", json=decision).status_code == 404
+    assert client.post("/api/claims/1/review", json={"decision": "paid"}).status_code == 422
+    assert client.get("/api/claims", params={"status": "lost"}).status_code == 422

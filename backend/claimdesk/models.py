@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -87,3 +87,25 @@ class ClaimAssessment(BaseModel):
     citations: list[Citation]
     flags: list[str]
     requires_human_review: bool = True
+
+
+ReviewStatus = Literal["pending", "approved", "denied", "returned"]
+
+
+class ReviewDecision(BaseModel):
+    """Recorded by a claims examiner, never by ClaimDesk."""
+
+    decision: Literal["approved", "denied", "returned"]
+    reviewer: str = Field(min_length=1, max_length=80)
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class QueuedClaim(BaseModel):
+    id: int
+    submitted_at: datetime
+    text: str
+    assessment: ClaimAssessment
+    review_status: ReviewStatus
+    reviewer: str | None = None
+    note: str | None = None
+    reviewed_at: datetime | None = None

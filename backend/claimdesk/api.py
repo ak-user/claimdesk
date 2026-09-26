@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -16,7 +16,16 @@ from .app_state import build_components
 from .config import Settings
 from .extraction import MAX_UPLOAD_BYTES, DocumentError, read_document
 from .guardrails import mask_pii
-from .models import AnswerOut, AskRequest, ClaimAssessment, ClaimText
+from .models import (
+    AnswerOut,
+    AskRequest,
+    ClaimAssessment,
+    ClaimText,
+    QueuedClaim,
+    ReviewDecision,
+    ReviewStatus,
+)
+from .review_queue import QueueError
 from .store import list_samples, read_sample
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -59,6 +68,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "retrieval": components.retriever.mode,
             "sections": len(components.retriever.chunks),
             "as_of": settings.claimdesk_as_of.isoformat(),
+            "queue": components.queue.counts(),
         }
 
     @app.post("/api/ask", response_model=AnswerOut)
@@ -78,6 +88,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except DocumentError as error:
             raise HTTPException(status_code=400, detail=str(error)) from error
         return components.assessor.assess(text)
+
+    # ----- examiner queue --------------------------------------------------------------------
+
+    @app.post("/api/claims", response_model=QueuedClaim, status_code=201)
+    def submit(body: ClaimText) -> QueuedClaim:
+        """Assesses a claim and puts it in the queue for a claims examiner."""
+        return components.queue.submit(body.text, components.assessor.assess(body.text))
+
+    @app.get("/api/claims", response_model=list[QueuedClaim])
+    def queue(
+        status: ReviewStatus | None = None, limit: Annotated[int, Query(ge=1, le=200)] = 50
+    ) -> list[QueuedClaim]:
+        return components.queue.list(status, limit)
+
+    @app.get("/api/claims/{claim_id}", response_model=QueuedClaim)
+    def queued_claim(claim_id: int) -> QueuedClaim:
+        claim = components.queue.get(claim_id)
+        if claim is None:
+            raise HTTPException(status_code=404, detail="Claim not found.")
+        return claim
+
+    @app.post("/api/claims/{claim_id}/review", response_model=QueuedClaim)
+    def review(claim_id: int, body: ReviewDecision) -> QueuedClaim:
+        try:
+            claim = components.queue.review(claim_id, body)
+        except QueueError as error:
+            code = 404 if "not found" in str(error) else 409
+            raise HTTPException(status_code=code, detail=str(error)) from error
+        log.info("claim %d %s by %s", claim_id, body.decision, mask_pii(body.reviewer))
+        return claim
 
     @app.get("/api/samples")
     def samples() -> list[dict[str, str]]:

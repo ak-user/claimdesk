@@ -34,6 +34,8 @@ class Settings(BaseSettings):
 
     claimdesk_as_of: date = DEFAULT_AS_OF
     claimdesk_static_dir: Path | None = None
+    # SQLite file for the examiner queue. ":memory:" forgets the queue on restart.
+    claimdesk_db_path: str = ":memory:"
     claimdesk_cors_origins: list[str] = ["http://localhost:5173"]
     retrieval_top_k: int = Field(default=4, ge=1, le=10)
     agent_max_steps: int = Field(default=6, ge=1, le=12)
