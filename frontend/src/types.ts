@@ -9,6 +9,7 @@ export interface Health {
   retrieval: "bm25" | "hybrid";
   sections: number;
   as_of: string;
+  queue: Partial<Record<ReviewStatus, number>>;
 }
 
 export interface Citation {
@@ -86,4 +87,23 @@ export interface ClaimAssessment {
 export interface Sample {
   name: string;
   title: string;
+}
+
+export type ReviewStatus = "pending" | "approved" | "denied" | "returned";
+
+export interface ReviewDecision {
+  decision: Exclude<ReviewStatus, "pending">;
+  reviewer: string;
+  note: string | null;
+}
+
+export interface QueuedClaim {
+  id: number;
+  submitted_at: string;
+  text: string;
+  assessment: ClaimAssessment;
+  review_status: ReviewStatus;
+  reviewer: string | null;
+  note: string | null;
+  reviewed_at: string | null;
 }

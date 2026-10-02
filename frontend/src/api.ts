@@ -1,4 +1,13 @@
-import type { Answer, ClaimAssessment, Health, Sample, Turn } from "./types";
+import type {
+  Answer,
+  ClaimAssessment,
+  Health,
+  QueuedClaim,
+  ReviewDecision,
+  ReviewStatus,
+  Sample,
+  Turn,
+} from "./types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -39,6 +48,11 @@ export const api = {
     form.append("file", file);
     return request<ClaimAssessment>("/api/claims/upload", { method: "POST", body: form });
   },
+  submit: (text: string) => request<QueuedClaim>("/api/claims", json({ text })),
+  queue: (status: ReviewStatus | null) =>
+    request<QueuedClaim[]>(status ? `/api/claims?status=${status}` : "/api/claims"),
+  review: (id: number, decision: ReviewDecision) =>
+    request<QueuedClaim>(`/api/claims/${id}/review`, json(decision)),
   samples: () => request<Sample[]>("/api/samples"),
   sample: (name: string) =>
     request<{ name: string; text: string }>(`/api/samples/${encodeURIComponent(name)}`),

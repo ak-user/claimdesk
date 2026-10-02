@@ -2,10 +2,17 @@ import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api";
 import { describeFlag, formatDate, money } from "../format";
-import type { ClaimAssessment, ClaimFields, ClaimStatus, Issue, Sample } from "../types";
+import type {
+  ClaimAssessment,
+  ClaimFields,
+  ClaimStatus,
+  Issue,
+  QueuedClaim,
+  Sample,
+} from "../types";
 import { SourceList } from "./Citations";
 
-const STATUS_LABEL: Record<ClaimStatus, string> = {
+export const STATUS_LABEL: Record<ClaimStatus, string> = {
   ready_for_review: "Ready for examiner review",
   needs_correction: "Needs correction",
   not_payable: "Not payable",
@@ -23,10 +30,13 @@ const FIELD_LABEL: Record<keyof ClaimFields, string> = {
 
 const SEVERITY_MARK: Record<Issue["severity"], string> = { error: "✕", warning: "!", info: "i" };
 
-export function ClaimPanel() {
+export function ClaimPanel({ onQueued }: { onQueued?: (claim: QueuedClaim) => void }) {
   const [samples, setSamples] = useState<Sample[]>([]);
   const [text, setText] = useState("");
   const [result, setResult] = useState<ClaimAssessment | null>(null);
+  // The text behind `result`, so it can be queued; uploads only keep the assessment.
+  const [checkedText, setCheckedText] = useState<string | null>(null);
+  const [queued, setQueued] = useState<QueuedClaim | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -35,11 +45,13 @@ export function ClaimPanel() {
     api.samples().then(setSamples, () => setSamples([]));
   }, []);
 
-  async function run(task: () => Promise<ClaimAssessment>) {
+  async function run(task: () => Promise<ClaimAssessment>, source: string | null = null) {
     setBusy(true);
     setError(null);
+    setQueued(null);
     try {
       setResult(await task());
+      setCheckedText(source);
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -52,9 +64,22 @@ export function ClaimPanel() {
     try {
       const sample = await api.sample(name);
       setText(sample.text);
-      await run(() => api.assess(sample.text));
+      await run(() => api.assess(sample.text), sample.text);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't load the sample.");
+    }
+  }
+
+  async function sendToQueue(source: string) {
+    setBusy(true);
+    try {
+      const claim = await api.submit(source);
+      setQueued(claim);
+      onQueued?.(claim);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't queue the claim.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -84,7 +109,7 @@ export function ClaimPanel() {
         className="claim-form"
         onSubmit={(event) => {
           event.preventDefault();
-          if (text.trim()) void run(() => api.assess(text));
+          if (text.trim()) void run(() => api.assess(text), text);
         }}
       >
         <label className="field-label" htmlFor="claim-text">
@@ -122,6 +147,17 @@ export function ClaimPanel() {
 
       {error && <p className="error-text">{error}</p>}
       {result && <Assessment result={result} />}
+      {result && checkedText && (
+        <div className="queue-action">
+          {queued ? (
+            <p className="muted">Sent to the examiner queue as claim #{queued.id}.</p>
+          ) : (
+            <button type="button" disabled={busy} onClick={() => void sendToQueue(checkedText)}>
+              Send to examiner queue
+            </button>
+          )}
+        </div>
+      )}
       {!result && !error && (
         <p className="empty">Pick a sample claim to see the checks: each one shows a different rule.</p>
       )}
@@ -129,7 +165,7 @@ export function ClaimPanel() {
   );
 }
 
-function Assessment({ result }: { result: ClaimAssessment }) {
+export function Assessment({ result }: { result: ClaimAssessment }) {
   const { fields, estimate } = result;
   return (
     <div className="assessment">
