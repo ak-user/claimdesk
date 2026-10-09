@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     # SQLite file for the examiner queue. ":memory:" forgets the queue on restart.
     claimdesk_db_path: str = ":memory:"
     claimdesk_cors_origins: list[str] = ["http://localhost:5173"]
+    # Requests per minute per client on the routes that can call the model. 0 turns it off.
+    claimdesk_rate_limit_per_minute: int = Field(default=30, ge=0)
     retrieval_top_k: int = Field(default=4, ge=1, le=10)
     agent_max_steps: int = Field(default=6, ge=1, le=12)
 

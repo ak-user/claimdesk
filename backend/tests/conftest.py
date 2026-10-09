@@ -23,6 +23,7 @@ def settings() -> Settings:
         openai_api_key=None,
         openai_chat_model=None,
         claimdesk_as_of=AS_OF,
+        claimdesk_rate_limit_per_minute=0,
     )
 
 
