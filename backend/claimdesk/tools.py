@@ -9,7 +9,7 @@ from calendar import monthrange
 from datetime import date, timedelta
 from typing import Any
 
-from .retrieval import Retriever
+from .retrieval import BookletIndex
 
 MEMBER_ID = re.compile(r"^M-\d{4}$")
 
@@ -27,7 +27,7 @@ class ToolError(ValueError):
 class Toolbox:
     def __init__(
         self,
-        retriever: Retriever,
+        retriever: BookletIndex,
         rules: dict[str, Any],
         members: dict[str, dict[str, Any]],
         as_of: date,

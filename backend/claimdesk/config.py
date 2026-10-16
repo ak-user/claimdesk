@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     openai_chat_model: str | None = None
     openai_embedding_model: str | None = None
 
+    # Azure AI Search. With an endpoint set, the booklet index lives there instead of in memory.
+    # Leave the key empty to sign in with Microsoft Entra ID.
+    azure_search_endpoint: str | None = None
+    azure_search_api_key: str | None = None
+    azure_search_index: str = "claimdesk-booklet"
+
     claimdesk_as_of: date = DEFAULT_AS_OF
     claimdesk_static_dir: Path | None = None
     # SQLite file for the examiner queue. ":memory:" forgets the queue on restart.

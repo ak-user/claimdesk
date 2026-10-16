@@ -133,7 +133,34 @@ az containerapp show --name claimdesk --resource-group rg-claimdesk \
 
 No key is stored anywhere: the container gets tokens from its managed identity.
 
-## 4. Clean up
+## 4. Optional: Azure AI Search for the index
+
+By default the booklet index is built in memory at startup. To keep it in Azure AI Search
+instead (useful once there are several booklets, or documents that change without a redeploy):
+
+```bash
+az search service create --name claimdesk-search --resource-group rg-claimdesk --sku basic
+
+# Keyless: let your account (and later the app's managed identity) use the index.
+SEARCH_ID=$(az search service show -n claimdesk-search -g rg-claimdesk --query id -o tsv)
+az search service update -n claimdesk-search -g rg-claimdesk --auth-options aadOrApiKey
+az role assignment create --assignee "$(az ad signed-in-user show --query id -o tsv)" \
+  --role "Search Index Data Contributor" --scope "$SEARCH_ID"
+az role assignment create --assignee "$(az ad signed-in-user show --query id -o tsv)" \
+  --role "Search Service Contributor" --scope "$SEARCH_ID"
+
+cd backend
+pip install -e ".[azure]"
+export AZURE_SEARCH_ENDPOINT=https://claimdesk-search.search.windows.net
+python -m claimdesk.azure_search          # creates the index and uploads 23 sections
+```
+
+Set `AZURE_SEARCH_ENDPOINT` on the container app too, and give its managed identity the
+**Search Index Data Reader** role. With an embedding deployment configured, each search sends the
+keywords and a vector, and the service fuses them with RRF. If the service fails, ClaimDesk answers
+from its local index and logs a warning; `/api/health` reports `azure-hybrid` or `azure-bm25`.
+
+## 5. Clean up
 
 Azure OpenAI bills per token and Container Apps per use, so delete everything when you're done:
 
@@ -143,9 +170,8 @@ az group delete --name rg-claimdesk --yes --no-wait
 
 ## Next steps
 
-- **Azure AI Search.** Replace the in-memory index in `retrieval.py` with an Azure AI Search
-  index (keyword plus vector, with semantic ranking). Keep the `Retriever.search` signature so
-  nothing else changes.
+- **Semantic ranking.** Turn on the semantic ranker in Azure AI Search and compare it with the
+  eval script before keeping it.
 - **Document Intelligence.** Read scanned claim forms with the prebuilt layout model, then pass
   the text to `ClaimAssessor.assess`.
 - **Databricks.** Set `MLFLOW_TRACKING_URI=databricks` with `DATABRICKS_HOST` and

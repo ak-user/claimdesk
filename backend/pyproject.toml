@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-azure = ["azure-identity>=1.17"]
+azure = ["azure-identity>=1.17", "azure-search-documents>=11.5"]
 mlflow = ["mlflow-skinny>=2.14"]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.5"]
 

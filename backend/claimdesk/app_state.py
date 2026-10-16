@@ -6,11 +6,12 @@ import logging
 from dataclasses import dataclass
 
 from .agent import Agent
+from .azure_search import build_retriever as build_search_retriever
 from .claims import ClaimAssessor
 from .config import Settings
 from .ingest import parse_booklet
 from .llm import build_clients
-from .retrieval import Retriever
+from .retrieval import BookletIndex, Retriever
 from .review_queue import ReviewQueue
 from .store import load_booklet, load_members, load_rules
 from .tools import Toolbox
@@ -21,7 +22,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class Components:
     settings: Settings
-    retriever: Retriever
+    retriever: BookletIndex
     toolbox: Toolbox
     agent: Agent
     assessor: ClaimAssessor
@@ -38,7 +39,15 @@ def build_components(settings: Settings) -> Components:
     except Exception:  # noqa: BLE001 - a bad key shouldn't stop the offline demo
         log.exception("Couldn't create the model client; running offline.")
         chat, embedder = None, None
-    retriever = Retriever(parse_booklet(load_booklet()), embedder)
+    chunks = parse_booklet(load_booklet())
+    retriever: BookletIndex | None = None
+    if settings.azure_search_endpoint:
+        try:
+            retriever = build_search_retriever(settings, chunks, embedder)
+        except Exception:  # noqa: BLE001 - same as above: fall back rather than fail to start
+            log.exception("Couldn't connect to Azure AI Search; using the local index.")
+    if retriever is None:
+        retriever = Retriever(chunks, embedder)
     toolbox = Toolbox(
         retriever,
         load_rules(),

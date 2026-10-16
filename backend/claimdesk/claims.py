@@ -15,7 +15,7 @@ from .guardrails import detect_injection
 from .ingest import snippet
 from .llm import ChatClient
 from .models import Citation, ClaimAssessment, ClaimFields, Estimate, Issue
-from .retrieval import Retriever
+from .retrieval import BookletIndex
 from .tools import Toolbox, add_months
 
 log = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ FIELD_NAMES = {
 
 class ClaimAssessor:
     def __init__(
-        self, toolbox: Toolbox, retriever: Retriever, client: ChatClient | None = None
+        self, toolbox: Toolbox, retriever: BookletIndex, client: ChatClient | None = None
     ) -> None:
         self.toolbox = toolbox
         self.retriever = retriever

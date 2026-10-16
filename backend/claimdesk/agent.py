@@ -23,7 +23,7 @@ from .guardrails import (
 from .ingest import snippet, split_sentences
 from .llm import ChatClient
 from .models import AnswerOut, Citation, ToolStep, Turn
-from .retrieval import Retriever, tokenize
+from .retrieval import BookletIndex, tokenize
 from .tools import Toolbox
 
 log = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class Agent:
     def __init__(
         self,
         toolbox: Toolbox,
-        retriever: Retriever,
+        retriever: BookletIndex,
         client: ChatClient | None = None,
         max_steps: int = 6,
     ) -> None:

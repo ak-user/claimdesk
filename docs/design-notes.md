@@ -84,8 +84,9 @@ larger set written by someone else, and a model-graded faithfulness check.
 
 ## What production would add
 
-- Azure AI Search instead of the in-memory index, with the same `Retriever` interface.
+- Azure AI Search as the only index, with per-plan filtering, once there is more than one booklet
+  (the adapter in `azure_search.py` already keeps the local index as a fallback).
 - Azure AI Document Intelligence for scanned forms.
 - Microsoft Entra ID sign-in for users, with members seeing only their own data.
 - OpenTelemetry traces to Application Insights, including token usage per request.
-- Rate limits, an audit log of every tool call, and data retention rules.
+- Rate limits shared across replicas, an audit log of every tool call, and data retention rules.

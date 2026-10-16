@@ -12,6 +12,7 @@ import math
 import re
 from collections import Counter
 from dataclasses import dataclass
+from typing import Protocol
 
 import numpy as np
 import snowballstemmer
@@ -95,6 +96,20 @@ class BM25:
 class SearchHit:
     chunk: Chunk
     score: float
+
+
+class BookletIndex(Protocol):
+    """What the tools and the agent need from a search index: the local `Retriever` or
+    `azure_search.AzureSearchRetriever`."""
+
+    chunks: list[Chunk]
+
+    @property
+    def mode(self) -> str: ...
+
+    def get(self, section: str) -> Chunk | None: ...
+
+    def search(self, query: str, k: int = 4) -> list[SearchHit]: ...
 
 
 class Retriever:
