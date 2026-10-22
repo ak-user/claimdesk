@@ -20,7 +20,9 @@ jobs:
       - run: ruff format --check .
       - run: pytest
       - name: Retrieval and answer quality gate
-        run: python -m claimdesk.eval.run_eval --min-hit-rate 0.9 --min-answer-accuracy 0.9
+        run: >
+          python -m claimdesk.eval.run_eval
+          --min-hit-rate 0.9 --min-answer-accuracy 0.9 --min-refusal-accuracy 1.0
 
   frontend:
     runs-on: ubuntu-latest

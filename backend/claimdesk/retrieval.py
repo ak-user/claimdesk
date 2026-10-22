@@ -56,6 +56,10 @@ SYNONYMS: dict[str, list[str]] = {
     "medication": ["prescription", "drugs"],
     "medicine": ["prescription", "drugs"],
     "refund": ["reimbursed"],
+    "job": ["employment"],
+    "quit": ["employment", "ends"],
+    "leave": ["ends"],
+    "send": ["submit"],
     "limit": ["maximum"],
     "max": ["maximum"],
 }

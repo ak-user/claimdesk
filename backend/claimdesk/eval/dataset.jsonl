@@ -18,3 +18,20 @@
 {"question": "How much vision coverage does M-1003 have left?", "sections": ["4.6"], "expect": ["$70.00"]}
 {"question": "What would I get back for a $95 massage? M-1003", "sections": ["4.3"], "expect": ["$76.00"]}
 {"question": "How much dental do I have left? M-1001", "sections": ["5.3", "5.1"], "expect": ["$1,292.00"]}
+{"question": "Is laser eye surgery covered?", "sections": ["4.6"], "expect": ["$250"]}
+{"question": "Are pharmacy dispensing fees covered?", "sections": ["4.1"], "expect": ["$10"]}
+{"question": "How often can I get an eye exam?", "sections": ["4.6"], "expect": ["24 months"]}
+{"question": "Can my 23-year-old who is a full-time student stay on the plan?", "sections": ["2.2"], "expect": ["25"]}
+{"question": "If I leave my job, how long do I have to send in old claims?", "sections": ["3.2"], "expect": ["90 days after the end date"]}
+{"question": "What is the chiropractic maximum?", "sections": ["4.4"], "expect": ["$500"]}
+{"question": "Do I have to keep my original receipts?", "sections": ["3.1"], "expect": ["12 months"]}
+{"question": "Both parents have coverage. Which plan pays first for our child?", "sections": ["7"], "expect": ["birthday"]}
+{"question": "What if my dentist charges more than the fee guide?", "sections": ["5.4"], "expect": ["difference"]}
+{"question": "Are cosmetic procedures covered?", "sections": ["6"], "expect": ["cosmetic"]}
+{"question": "What about a $120 session?", "member_id": "M-1001", "history": [{"role": "user", "content": "How much physio do I have left?"}], "sections": ["4.2"], "expect": ["$96.00"]}
+{"question": "And how much dental?", "history": [{"role": "user", "content": "How much physio does M-1001 have left?"}], "sections": ["5.3"], "expect": ["$1,292.00"]}
+{"question": "How long do I have to submit a claim?", "member_id": "M-1001", "history": [{"role": "user", "content": "How much physio do I have left?"}], "sections": ["3.2"], "expect": ["12 months"]}
+{"question": "Should I take ibuprofen for back pain?", "refused": true, "expect": ["medical advice"]}
+{"question": "What dosage of amoxicillin is right for a child?", "refused": true, "expect": ["medical advice"]}
+{"question": "Can you approve my claim for a massage?", "refused": true, "expect": ["claims examiner"]}
+{"question": "My claim was denied. How do I appeal?", "refused": false, "sections": ["8"], "expect": ["90 days"]}
