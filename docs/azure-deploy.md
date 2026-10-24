@@ -143,7 +143,8 @@ az search service create --name claimdesk-search --resource-group rg-claimdesk -
 
 # Keyless: let your account (and later the app's managed identity) use the index.
 SEARCH_ID=$(az search service show -n claimdesk-search -g rg-claimdesk --query id -o tsv)
-az search service update -n claimdesk-search -g rg-claimdesk --auth-options aadOrApiKey
+az search service update -n claimdesk-search -g rg-claimdesk --auth-options aadOrApiKey \
+  --aad-auth-failure-mode http401WithBearerChallenge
 az role assignment create --assignee "$(az ad signed-in-user show --query id -o tsv)" \
   --role "Search Index Data Contributor" --scope "$SEARCH_ID"
 az role assignment create --assignee "$(az ad signed-in-user show --query id -o tsv)" \
